@@ -60,8 +60,10 @@ This model can be used in retail space (like showroom) to analysis how much part
 I explored below models in Tensorflow Object Detection Model Zoo([https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md)).
 
 - **ssd_mobilenet_v2_coco(IR format) –** Inference time is good , accuracy is ok. But it missed lot of consecutive frames for ~4sec when 2nd person(in test video) was in standstill position with probability threshold of 0.5. To solve that issue, I put logic(state machine , see below state diagram) in program , once person detected in frame and missed in subsequent frame ,it starts counter and wait for threshold  no of  consecutive frames where person is not detected. If person is detected again before counter value crosses threshold value, it decides person detected was same person and model missed to detect person in few frames. If counter value cross threshold before detecting person, it decides person has left scene. Even though with this logic when threshold time was set to 4 sec, it created another issue , time gap between 1st person exit and 2nd person entering video is less than 4 sec which causes  2nd person to detect as 1st person. To solve this issue I needed to improve  person detection of model so I reduce probability threshold to 0.3 and then detection was improved and don’t have issue.
-Other than playing with probability threshold, I tried other object detection model(discussed below).
 
+![State Machine Diagram](https://github.com/chetancyber24/People_Counter_OpenVINO/blob/master/state_machine_dig.png)
+
+Other than playing with probability threshold, I tried other object detection model(discussed below).
 
 I explored **ssd_resnet_50_fpn_coco** which has better mAP score than Mobilenet_V2 . But resnet model also failed to detect  2nd person in standstill position for ~4sec consecutive frames with probability threshold of 0.5. Also its inference time (1sec /frame) is very high compare to Mobilenet.  I also tried **ssd_inception_v2_coco** but that also has same issue.
 
